@@ -18,10 +18,11 @@ public class EmprunterDto extends HateOAS {
 
     public EmprunterDto(EmprunterEntity emprunter){
         this.login = emprunter.getEmprunterEntityPK().getLogin();
-        this.ean13 = emprunter.getEmprunterEntityPK().getEan13();
-        this.num_exemplaire = emprunter.getEmprunterEntityPK().getNumExemplaire();
-        this.date_emprunt = emprunter.getDateEmprunt();
+        this.ean13 = emprunter.getEmprunterEntityPK().getExemplaireEntityPK().getEan13();
+        this.num_exemplaire = emprunter.getEmprunterEntityPK().getExemplaireEntityPK().getNumExemplaire();
+        this.date_emprunt = emprunter.getEmprunterEntityPK().getDate_emprunt();
         this.date_retour = emprunter.getDateRetour();
     }
+
 
 }

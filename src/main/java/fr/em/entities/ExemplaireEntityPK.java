@@ -8,6 +8,7 @@ import java.io.Serializable;
 @Data
 @Embeddable
 public class ExemplaireEntityPK implements Serializable {
+
     @Column(name = "EAN13")
     private String ean13;
 

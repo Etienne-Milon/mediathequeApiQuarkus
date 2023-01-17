@@ -77,9 +77,9 @@ public class ExemplaireRessource {
         ExemplaireEntity exemplaireEntity = exemplaireRepository.findById(exemplaireEntityPK);
         ExemplaireDto exemplaireDto = new ExemplaireDto(exemplaireEntity);
         String uri = uriInfo.getRequestUriBuilder().build().toString();
-        exemplaireDto.addLink("all", uri.replace(exemplaireEntity.getExemplaireEntityPK().getEan13(),"allExemplaires") );
-        exemplaireDto.addLink("article", uri.replace("allExemplaires", "") + exemplaireEntity.getExemplaireEntityPK().getEan13());
-        exemplaireDto.addLink("self", uri.replace("allExemplaires", "") + exemplaireEntity.getExemplaireEntityPK().getEan13() + "/" + exemplaireEntity.getExemplaireEntityPK().getNumExemplaire());
+        exemplaireDto.addLink("all", uri.replace(exemplaireEntity.getExemplaireEntityPK().getEan13() + "-" + exemplaireEntity.getExemplaireEntityPK().getNumExemplaire(),"allExemplaires") );
+        exemplaireDto.addLink("article", uri.replace("-" + exemplaireEntity.getExemplaireEntityPK().getNumExemplaire(), ""));
+        exemplaireDto.addLink("self", uri);
         return Response.ok(exemplaireDto).build();
     }
 

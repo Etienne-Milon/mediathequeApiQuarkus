@@ -3,6 +3,9 @@ package fr.em.endpoint;
 import fr.em.dto.EmprunterDto;
 import fr.em.entities.EmprunterEntity;
 
+import fr.em.entities.EmprunterEntityPK;
+import fr.em.entities.ExemplaireEntity;
+import fr.em.entities.ExemplaireEntityPK;
 import fr.em.repositories.EmprunterRepository;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.eclipse.microprofile.openapi.annotations.Operation;
@@ -49,6 +52,7 @@ public class EmprunterRessource {
             /* ajouts possibles :
                 historique d'emprunts d'un article : emprunter/ean13/historique
                 historique d'emprunts d'un exemplaire : emprunter/ean13-1/historique
+                historique d'emprunts d'un utilisateur : user/emprunter/historique
             */
 
             empruntsList.add(emprunterDto);
@@ -57,24 +61,38 @@ public class EmprunterRessource {
     }
 
     @Transactional
-    @Operation(summary = "Create an 'emprunt'")
+    @Operation(summary = "Crée un 'emprunt'")
     @POST
     @Path("/insert")
-    public Response insert(EmprunterEntity emprunt){
-        emprunt.setDateEmprunt(java.sql.Date.valueOf(LocalDate.now()));
+    public Response insert(EmprunterEntity emprunt) {
+        EmprunterEntityPK emprunterEntityPK = new EmprunterEntityPK();
+        Date date = java.sql.Date.valueOf(LocalDate.now());
+        emprunterEntityPK.setDate_emprunt(date);
+        emprunterEntityPK.setLogin(emprunt.getEmprunterEntityPK().getLogin());
+        emprunterEntityPK.setExemplaireEntityPK(emprunt.getEmprunterEntityPK().getExemplaireEntityPK());
+        emprunt.setEmprunterEntityPK(emprunterEntityPK);
         emprunterRepository.persist(emprunt);
         return Response.ok(Response.Status.OK).build();
     }
 
     @Transactional
-    @Operation(summary = "Modify 'date_retour' of an 'emprunt'")
-    @GET
+    @Operation(summary = "update la 'date_retour' d'un 'emprunt' à 'aujourd'hui'")
+    @POST
     @Path("/return")
-    public Response retour(EmprunterEntity emprunt){
+    public Response retour(ExemplaireEntityPK exemplaire) {
+        EmprunterEntityPK emprunterEntityPK = new EmprunterEntityPK();
+        emprunterEntityPK.setExemplaireEntityPK(exemplaire);
+        EmprunterEntity emprunt = emprunterRepository.getEmprunterEntityByTwoKeys(
+                exemplaire.getEan13(),
+                String.valueOf(exemplaire.getNumExemplaire()));
         Date date = java.sql.Date.valueOf(LocalDate.now());
-        emprunterRepository.update("date_retour = ?1 where login = ?2",date,emprunt.getEmprunterEntityPK().getLogin());
-
-        return null;
+        emprunterRepository.update("date_retour = ?1 where login = ?2 and ean13=?3 and num_exemplaire = ?4 and date_emprunt = ?5",
+                date,
+                emprunt.getEmprunterEntityPK().getLogin(),
+                emprunt.getEmprunterEntityPK().getExemplaireEntityPK().getEan13(),
+                emprunt.getEmprunterEntityPK().getExemplaireEntityPK().getNumExemplaire(),
+                emprunt.getEmprunterEntityPK().getDate_emprunt());
+        return Response.ok(Response.Status.OK).build();
     }
 
 }
